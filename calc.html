@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+.small {
+    width:47px;
+    height:35px;
+    color:inherit;
+    margin:1px
+}
+
+.big {
+    width:96px;
+    height:35px;
+    color:inherit;
+    margin:1px
+}
+
+.main-wrapper {
+    width:294px;
+    border:solid 1px silver;
+    padding:7px;
+    background:#E9E9E9;
+    color:#4B4B4B;
+    webkit-box-shadow:2px 2px 2px 2px rgba(0,0,0,0.48);
+    -moz-box-shadow:2px 2px 2px 2px rgba(0,0,0,0.48);
+    box-shadow:0 1px 5px 1px rgba(0,0,0,0.48)
+}
+
+.screen-wrapper {
+    padding:3px;
+    text-align:right;
+    width:97%;
+    height:70px;
+    border:inherit;
+    background:#fff;
+    display:inline-block;
+    margin-bottom:5px;
+    position:relative;
+    overflow-wrap:break-word;
+    overflow-y:auto
+}
+
+.button-wrapper {
+    width:inherit
+}
+
+.menu-wrapper {
+    width:inherit;
+    padding-bottom:10px;
+    font-family:sans-serif;
+    font-size:13px;
+    color:inherit
+}
+
+.title-wrapper {
+    font-family:sans-serif;
+    text-align:right;
+    width:58%;
+    display:inline-block;
+    font-size:15px;
+    color:silver;
+    font-weight:900
+}
+
+.close-wrapper {
+    font-family:sans-serif;
+    text-align:right;
+    width:40%;
+    display:inline-block;
+    font-size:11px;
+    color:silver;
+    font-weight:900
+}
+
+label.err {
+    position:absolute;
+    bottom:0;
+    right:0;
+    font-family:sans-serif;
+    font-size:13px;
+    padding:2px
+}
+</style>
+</head>
+<body>
+
+</body>
+<script src ="https://cdnjs.cloudflare.com/ajax/libs/mathjs/1.6.0/math.js">
+</script>
+<script>
+(function() {
+    var Calc = {
+        init: function() {
+            this.draw();
+        },
+        draw: function() {
+            this.drawContainer();
+            this.drawButtons();
+        },
+        drawContainer: function() {
+            var innerCont =
+                '<div class="title-wrapper">Calculator</div><!-- title wrapper-->' +
+                '<div class="close-wrapper">X</div><!-- title wrapper-->' +
+                '<div class="menu-wrapper">Application</div><!-- menu wrapper-->' +
+                '<div class="screen-wrapper" id="screen" ></div><!-- screen wrapper-->' +
+                '<div class="button-wrapper" id="buttons"></div><!-- buttons wrapper-->';
+            var div = document.createElement('div');
+            var cssClass = document.createAttribute("class");
+            cssClass.value = "main-wrapper";
+            div.setAttributeNode(cssClass);
+            div.innerHTML = innerCont;
+            document.getElementsByTagName("BODY")[0].appendChild(
+                div);
+        },
+        drawButtons: function() {
+            for (var property in this.SYMBOLS) {
+                if (this.SYMBOLS.hasOwnProperty(property)) {
+                    var value = (this.SYMBOLS[property]["value"] ===
+                        undefined) ? this.SYMBOLS[property][
+                        "face"
+                    ] : this.SYMBOLS[property]["value"]
+                    var but = new this.Button(value, this.SYMBOLS[
+                        property]["face"], this.SYMBOLS[
+                        property]["cssClass"], this.operationSelect(
+                        this.SYMBOLS[property]["fType"]));
+                    but.draw();
+                }
+            }
+        },
+        screenArray: [],
+        parsedArray: [],
+        SYMBOLS: {
+            seven: {
+                face: "7",
+                position: 1,
+                cssClass: "small",
+                fType: 1
+            },
+            eight: {
+                face: "8",
+                position: 2,
+                cssClass: "small",
+                fType: 1
+            },
+            nine: {
+                face: "9",
+                position: 3,
+                cssClass: "small",
+                fType: 1
+            },
+            divide: {
+                face: "\367",
+                position: 4,
+                cssClass: "small",
+                fType: 1,
+                operator: "/"
+            },
+            backSpace: {
+                face: "\u2190",
+                position: 5,
+                cssClass: "small",
+                fType: 2
+            },
+            clear: {
+                face: "AC",
+                position: 6,
+                cssClass: "small",
+                fType: 4
+            },
+            four: {
+                face: "4",
+                position: 7,
+                cssClass: "small",
+                fType: 1
+            },
+            five: {
+                face: "5",
+                position: 8,
+                cssClass: "small",
+                fType: 1
+            },
+            six: {
+                face: "6",
+                position: 9,
+                cssClass: "small",
+                fType: 1
+            },
+            multiply: {
+                face: "*",
+                position: 10,
+                cssClass: "small",
+                fType: 1
+            },
+            leftParenthesis: {
+                face: "\u0028",
+                position: 11,
+                cssClass: "small",
+                fType: 1
+            },
+            rightParenthesis: {
+                face: "\u0029",
+                position: 12,
+                cssClass: "small",
+                fType: 1
+            },
+            one: {
+                face: "1",
+                position: 13,
+                cssClass: "small",
+                fType: 1
+            },
+            two: {
+                face: "2",
+                position: 14,
+                cssClass: "small",
+                fType: 1
+            },
+            three: {
+                face: "3",
+                position: 15,
+                cssClass: "small",
+                fType: 1
+            },
+            minus: {
+                face: "-",
+                position: 16,
+                cssClass: "small",
+                fType: 1
+            },
+            squared: {
+                face: "x" + "\u00B2",
+                position: 17,
+                cssClass: "small",
+                fType: 1,
+                operator: "^2",
+                value: "\u00B2"
+            },
+            squareRoot: {
+                face: "\u221A",
+                position: 18,
+                cssClass: "small",
+                fType: 1,
+                operator: "sqrt"
+            },
+            zero: {
+                face: "0",
+                position: 19,
+                cssClass: "small",
+                fType: 1
+            },
+            dot: {
+                face: ".",
+                position: 20,
+                cssClass: "small",
+                fType: 1
+            },
+            percentage: {
+                face: "\u0025",
+                position: 21,
+                cssClass: "small",
+                fType: 1,
+                operator: "*0.01"
+            },
+            plus: {
+                face: "\u002B",
+                position: 22,
+                cssClass: "small",
+                fType: 1
+            },
+            equals: {
+                face: "\u003D",
+                position: 23,
+                cssClass: "big",
+                fType: 3
+            }
+        },
+        _showValue: function(value) {
+            Calc.screenArray.push(value);
+            Calc.refreshScreen();
+        },
+        _removeLast: function(value) {
+            Calc.screenArray.pop();
+            Calc.refreshScreen();
+        },
+        _evaluate: function(value) {
+            Calc.parsedArray = [];
+            var val;
+            try {
+                val = math.eval(Calc.parseArrayToEval());
+            } catch (err) {
+                console.log(err);
+                val =
+                    '<label class="err">Malformed expression.</label>'
+            }
+            Calc.screenArray = [];
+            Calc.screenArray.push(val);
+            Calc.refreshScreen();
+            Calc.screenArray = [];
+        },
+        _clearAll: function() {
+            Calc.screenArray = [];
+            Calc.parsedArray = [];
+            Calc.refreshScreen();
+        },
+        refreshScreen: function() {
+            document.getElementById("screen").innerHTML = Calc.screenArray
+                .toString().replace(/,/g, "");
+        },
+        Button: function(value, symbol, css, functionToRun) {
+            this.draw = function() {
+                var btn = document.createElement("BUTTON");
+                var cssClass = document.createAttribute("class");
+                cssClass.value = css;
+                var t = document.createTextNode(symbol);
+                btn.setAttributeNode(cssClass);
+                btn.appendChild(t);
+                btn.onclick = function() {
+                    functionToRun(value);
+                }
+                document.getElementById("buttons").appendChild(
+                    btn);
+            }
+        },
+        operationSelect: function(val) {
+            var func;
+            switch (val) {
+                case 1:
+                    func = this._showValue;
+                    break;
+                case 2:
+                    func = this._removeLast;
+                    break;
+                case 3:
+                    func = this._evaluate;
+                    break;
+                case 4:
+                    func = this._clearAll;
+                    break;
+            }
+            return func;
+        },
+        isNumber: function(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        },
+        parseArrayToEval: function() {
+            this.parseOperation(this.SYMBOLS.divide.face, this.SYMBOLS
+                .divide.operator, this.screenArray);
+            this.parseOperation(this.SYMBOLS.percentage.face, this.SYMBOLS
+                .percentage.operator, this.parsedArray);
+            this.parseOperation(this.SYMBOLS.squareRoot.face, this.SYMBOLS
+                .squareRoot.operator, this.parsedArray);
+            this.parseOperation(this.SYMBOLS.squared.value, this.SYMBOLS
+                .squared.operator, this.parsedArray);
+            this.addBrackets();
+            return this.parsedArray.join('');
+        },
+        parseOperation: function(face, operator, arr) {
+            this.parsedArray = this.replaceAll(face, operator, arr.join())
+                .split(',');
+        },
+        addBrackets: function() {
+            //check for sqrt
+            for (var i = 0; i < this.parsedArray.length; i++) {
+                if (this.parsedArray[i] === this.SYMBOLS.squareRoot
+                    .operator) {
+                    var sqrtIndex = i;
+                    var nextPos = sqrtIndex + 1;
+                    var prevPos = sqrtIndex - 1;
+                    //check if the prev item is a number if so prepend multiplication
+                    var prevItem = this.parsedArray[prevPos];
+                    if (prevItem !== undefined && this.isNumber(
+                        prevItem)) {
+                        this.parsedArray[i] = this.SYMBOLS.multiply
+                            .face + this.parsedArray[i];
+                    }
+                    if (sqrtIndex !== -1) {
+                        //check if the next item is a bracket
+                        if (this.parsedArray[nextPos] !== this.SYMBOLS
+                            .leftParenthesis.face) {
+                            this.parsedArray.splice(sqrtIndex + 1,
+                                0, this.SYMBOLS.leftParenthesis
+                                .face);
+                            var cnt = nextPos + 1;
+                            while (this.isNumber(this.parsedArray[
+                                cnt])) {
+                                cnt++;
+                            }
+                            this.parsedArray.splice(cnt, 0, this.SYMBOLS
+                                .rightParenthesis.face);
+                        }
+                    }
+                }
+            }
+        },
+        replaceAll: function(find, replace, str) {
+            return str.replace(new RegExp(find, 'g'), replace);
+        }
+    }
+    Calc.init();
+})();
+</script>
+<html>
